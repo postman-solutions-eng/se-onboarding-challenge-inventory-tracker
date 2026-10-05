@@ -21,6 +21,7 @@ STRUCTURE
 - Tag every operation with exactly one tag (Items, Locations, Stock, Movements, System) with a description, so the generated Postman collection has one folder per tag
 - Unique, descriptive operationId and summary on every operation (these become request names)
 - Reuse everything via components: schemas, parameters, responses, requestBodies, examples
+- Every component defined under `components:` must be referenced by at least one operation via `$ref` — don't leave unused schemas/requestBodies/responses behind
 - Define schemas separately for create/update/response (e.g. ItemCreate, ItemUpdate, Item), with required fields, formats, enums, min/max, patterns (e.g. SKU pattern), and readOnly for server-generated ids and timestamps
 - Model the POST /stock-movements request body with oneOf and a discriminator on "type": ReceiveMovement, IssueMovement, AdjustMovement
 - Security: bearer (JWT) scheme applied globally, with /health excluded
@@ -28,7 +29,8 @@ STRUCTURE
 REQUEST COVERAGE
 - Every path/query parameter has a description, schema, and example
 - Every request body has at least 2 named examples under `examples:` (not the single `example:` field), including one minimal-valid and one full payload
-- POST /stock-movements has at least one named example per type (receive, issue, adjust)
+- For every named failure response example in RESPONSE COVERAGE below (400/404/409/422), add a request example with the identical key that would actually produce that response — not just happy-path examples
+- POST /stock-movements needs named request examples for all three happy-path types (receive, issue, adjust) and for every failure scenario below (missing field, invalid value, not-found id, insufficient stock) — same naming convention as the response examples they trigger
 
 RESPONSE COVERAGE (for collection runner tests)
 For each operation, document realistic responses with named examples:
@@ -45,5 +47,5 @@ CONSISTENCY
 - Use ISO 8601 timestamps, UUIDs for ids, camelCase property names
 
 OUTPUT
-- Validate the spec for errors, then fix any issues
+- Validate the spec for OpenAPI errors. Then separately verify: every named response example (especially 400/401/404/409/422) has a same-named request example that produces it, and no component is left unreferenced
 - Briefly summarize the endpoints and the example names per operation
