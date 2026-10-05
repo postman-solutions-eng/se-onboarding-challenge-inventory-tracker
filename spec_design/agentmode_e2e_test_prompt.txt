@@ -1,0 +1,62 @@
+Using the Inventory Tracker collection generated from the OpenAPI spec, turn it into an
+end-to-end test suite with variable chaining. Do not change the spec. Only modify the
+collection.
+
+1. FOLDER STRUCTURE
+- Create a folder "E2E Happy Path" containing these requests in this exact order:
+  1. POST /locations (create WH-EAST)
+  2. POST /items (create item with a unique SKU)
+  3. POST /stock-movements (receive 100 units)
+  4. GET /items/{itemId}/stock (assert 100)
+  5. POST /stock-movements (issue 30 units)
+  6. GET /items/{itemId}/stock (assert 70)
+  7. GET /stock-movements filtered by itemId (assert both movements are listed)
+  8. DELETE /items/{itemId} (cleanup)
+- Create a separate folder "Failure Cases" with one request per failure scenario from the
+  spec examples (400 missing field, 400 negative quantity, 409 duplicate SKU, 404 unknown
+  itemId, 422 issue exceeds stock, 401 missing token). Keep it outside the happy path
+  folder so a failure never breaks the chain.
+- Set the folder run order so E2E Happy Path runs first, then Failure Cases.
+
+2. VARIABLES
+- Environment variables: baseUrl, token.
+- Collection variables set during the run: locationId, itemId, sku, receiveMovementId,
+  issueMovementId.
+- In a collection-level pre-request script, generate a unique SKU for each run
+  (for example WIDGET-<timestamp>) and store it in the sku variable, so the suite can be
+  re-run without 409 conflicts.
+- Replace every hardcoded ID in URLs and bodies with {{variable}} references.
+
+3. CHAINING (post-response scripts)
+- POST /locations: save the returned id as locationId.
+- POST /items: save id as itemId.
+- Receive movement: save id as receiveMovementId.
+- Issue movement: save id as issueMovementId.
+- Before saving, check that the id exists in the response, and fail the test with a clear
+  message if it does not.
+
+4. ASSERTIONS (tests tab on each request)
+- Every request: check the expected status code, Content-Type is application/json, and
+  response time is under 1000 ms.
+- Validate the response body against the matching schema from the spec.
+- Receive: response quantity equals 100.
+- First stock check: quantity for locationId equals 100.
+- Issue: response type equals "issue" and quantity equals 30.
+- Second stock check: quantity for locationId equals 70.
+- Movements list: contains both receiveMovementId and issueMovementId.
+- Failure requests: check the status code and that the body matches the shared Error
+  schema (code, message, details).
+
+5. FAIL-FAST AND CLEANUP
+- In the happy path, add a pre-request check to requests 3 to 8 that stops the run with
+  pm.execution.setNextRequest(null) if itemId or locationId is missing.
+- After the DELETE in step 8, unset itemId, locationId, sku, receiveMovementId, and
+  issueMovementId.
+- Failure Cases that need existing state (409, 422) must create their own item and
+  stock first, or reuse the happy path variables only if the happy path folder ran
+  before them. State this assumption in the folder description.
+
+6. OUTPUT
+- Run the collection once with the collection runner and report which requests passed
+  or failed.
+- Summarize the variables each request reads and writes in a short table.

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inventory tracker API call flow</title>
+<style>
+:root {
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #f7f8f6;
+  --ink: #1d2623;
+  --muted: #5d6a65;
+  --ok-bg: #e3f1ec;
+  --ok-line: #1f7a63;
+  --ok-ink: #0d3d31;
+  --bad-bg: #fbe9e2;
+  --bad-line: #b5502c;
+  --bad-ink: #5a2412;
+  --rule: #c9d1cd;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141917; --ink: #e7ece9; --muted: #9aa8a2;
+    --ok-bg: #173229; --ok-line: #4fb89b; --ok-ink: #bfeadc;
+    --bad-bg: #3a211a; --bad-line: #e08a66; --bad-ink: #f6d3c4;
+    --rule: #34403b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #141917; --ink: #e7ece9; --muted: #9aa8a2;
+  --ok-bg: #173229; --ok-line: #4fb89b; --ok-ink: #bfeadc;
+  --bad-bg: #3a211a; --bad-line: #e08a66; --bad-ink: #f6d3c4;
+  --rule: #34403b;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+main { max-width: 860px; margin: 0 auto; padding: 32px 20px 48px; }
+h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 4px; }
+.sub { color: var(--muted); margin: 0 0 28px; }
+.cols, .row {
+  display: grid; grid-template-columns: 1fr 56px 1fr; align-items: stretch;
+}
+.cols { margin-bottom: 10px; color: var(--muted); font-size: 0.9rem; }
+.cols span:last-child { grid-column: 3; }
+.step { display: contents; }
+.card {
+  border: 1px solid; border-radius: 8px; padding: 12px 14px;
+}
+.ok { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok-ink); }
+.bad { background: var(--bad-bg); border-color: var(--bad-line); color: var(--bad-ink); }
+.card b { display: block; font-weight: 600; }
+.card code, .card b { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.92rem; }
+.card span { display: block; font-size: 0.9rem; opacity: 0.9; margin-top: 2px; }
+.link { display: flex; align-items: center; justify-content: center; }
+.link svg { width: 40px; height: 12px; }
+.down { display: flex; justify-content: center; height: 22px; }
+.down svg { width: 12px; height: 22px; }
+.rowwrap { margin: 0; }
+.note { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.92rem; }
+@media (max-width: 640px) {
+  .cols { display: none; }
+  .row { grid-template-columns: 1fr; }
+  .link { height: 22px; }
+  .link svg { transform: rotate(90deg); }
+  .down { justify-content: flex-start; padding-left: 20px; }
+}
+</style>
+</head>
+<body>
+<main>
+  <h1>Inventory tracker: one collection run</h1>
+  <p class="sub">Six calls in order, each paired with the failure case to test. Sample data: WH-EAST, WIDGET-001.</p>
+
+  <div class="cols"><span>Success path</span><span></span><span>Failure case to run</span></div>
+
+  <div class="row">
+    <div class="card ok"><b>POST /locations</b><span>Create WH-EAST, 201</span></div>
+    <div class="link"><svg viewBox="0 0 40 12" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" aria-hidden="true"><path d="M0 6H34"/><path d="M30 2L35 6L30 10" stroke-dasharray="0"/></svg></div>
+    <div class="card bad"><b>400 validation error</b><span>Missing required field</span></div>
+  </div>
+  <div class="down"><svg viewBox="0 0 12 22" fill="none" stroke="var(--muted)" stroke-width="1.5" aria-hidden="true"><path d="M6 0V19"/><path d="M2 15L6 20L10 15"/></svg></div>
+
+  <div class="row">
+    <div class="card ok"><b>POST /items</b><span>Create WIDGET-001, 201</span></div>
+    <div class="link"><svg viewBox="0 0 40 12" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" aria-hidden="true"><path d="M0 6H34"/><path d="M30 2L35 6L30 10" stroke-dasharray="0"/></svg></div>
+    <div class="card bad"><b>409 conflict</b><span>Duplicate SKU</span></div>
+  </div>
+  <div class="down"><svg viewBox="0 0 12 22" fill="none" stroke="var(--muted)" stroke-width="1.5" aria-hidden="true"><path d="M6 0V19"/><path d="M2 15L6 20L10 15"/></svg></div>
+
+  <div class="row">
+    <div class="card ok"><b>POST /stock-movements</b><span>Receive 100 units, 201</span></div>
+    <div class="link"><svg viewBox="0 0 40 12" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" aria-hidden="true"><path d="M0 6H34"/><path d="M30 2L35 6L30 10" stroke-dasharray="0"/></svg></div>
+    <div class="card bad"><b>400 validation error</b><span>Negative quantity</span></div>
+  </div>
+  <div class="down"><svg viewBox="0 0 12 22" fill="none" stroke="var(--muted)" stroke-width="1.5" aria-hidden="true"><path d="M6 0V19"/><path d="M2 15L6 20L10 15"/></svg></div>
+
+  <div class="row">
+    <div class="card ok"><b>GET /items/{itemId}/stock</b><span>100 at WH-EAST, 200</span></div>
+    <div class="link"><svg viewBox="0 0 40 12" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" aria-hidden="true"><path d="M0 6H34"/><path d="M30 2L35 6L30 10" stroke-dasharray="0"/></svg></div>
+    <div class="card bad"><b>404 not found</b><span>Unknown itemId</span></div>
+  </div>
+  <div class="down"><svg viewBox="0 0 12 22" fill="none" stroke="var(--muted)" stroke-width="1.5" aria-hidden="true"><path d="M6 0V19"/><path d="M2 15L6 20L10 15"/></svg></div>
+
+  <div class="row">
+    <div class="card ok"><b>POST /stock-movements</b><span>Issue 30 units, 201</span></div>
+    <div class="link"><svg viewBox="0 0 40 12" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" aria-hidden="true"><path d="M0 6H34"/><path d="M30 2L35 6L30 10" stroke-dasharray="0"/></svg></div>
+    <div class="card bad"><b>422 business rule</b><span>Issue exceeds available stock</span></div>
+  </div>
+  <div class="down"><svg viewBox="0 0 12 22" fill="none" stroke="var(--muted)" stroke-width="1.5" aria-hidden="true"><path d="M6 0V19"/><path d="M2 15L6 20L10 15"/></svg></div>
+
+  <div class="row">
+    <div class="card ok"><b>GET /stock-movements</b><span>Filter by itemId, 200</span></div>
+    <div class="link"><svg viewBox="0 0 40 12" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" aria-hidden="true"><path d="M0 6H34"/><path d="M30 2L35 6L30 10" stroke-dasharray="0"/></svg></div>
+    <div class="card bad"><b>401 unauthorized</b><span>Missing or invalid token</span></div>
+  </div>
+
+  <p class="note">All calls send a bearer token except GET /health. The 401 case applies to every endpoint; run it by clearing the token variable.</p>
+</main>
+</body>
+</html>

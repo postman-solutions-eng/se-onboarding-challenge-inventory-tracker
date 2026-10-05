@@ -1,0 +1,49 @@
+Create an OpenAPI 3.0.3 spec (YAML) for a simple Inventory Tracker API.
+
+DOMAIN (keep it small and realistic)
+- Items: SKU, name, description, unit, reorder threshold, status (active/discontinued)
+- Locations: warehouses/bins where stock is held
+- Stock movements: receive, issue, and adjust stock for an item at a location
+  - receive and issue require a positive integer quantity (minimum 1); the type sets the direction
+  - issue cannot take stock below zero
+  - adjust takes a signed nonzero integer delta and requires a "reason"
+- Stock levels: current quantity per item per location
+
+ENDPOINTS (no more than ~12 operations)
+- Items: GET /items (filter by status, search by name, paginated), POST /items, GET /items/{itemId}, PATCH /items/{itemId}, DELETE /items/{itemId}
+- Locations: GET /locations, POST /locations, GET /locations/{locationId}
+- Stock: GET /items/{itemId}/stock (levels per location)
+- Movements: POST /stock-movements (type: receive | issue | adjust), GET /stock-movements (filter by itemId, locationId, type, date range)
+- GET /health
+
+STRUCTURE
+- Info block with title, version, description, and a servers entry with a {baseUrl} variable (default http://localhost:3000)
+- Tag every operation with exactly one tag (Items, Locations, Stock, Movements, System) with a description, so the generated Postman collection has one folder per tag
+- Unique, descriptive operationId and summary on every operation (these become request names)
+- Reuse everything via components: schemas, parameters, responses, requestBodies, examples
+- Define schemas separately for create/update/response (e.g. ItemCreate, ItemUpdate, Item), with required fields, formats, enums, min/max, patterns (e.g. SKU pattern), and readOnly for server-generated ids and timestamps
+- Model the POST /stock-movements request body with oneOf and a discriminator on "type": ReceiveMovement, IssueMovement, AdjustMovement
+- Security: bearer (JWT) scheme applied globally, with /health excluded
+
+REQUEST COVERAGE
+- Every path/query parameter has a description, schema, and example
+- Every request body has at least 2 named examples under `examples:` (not the single `example:` field), including one minimal-valid and one full payload
+- POST /stock-movements has at least one named example per type (receive, issue, adjust)
+
+RESPONSE COVERAGE (for collection runner tests)
+For each operation, document realistic responses with named examples:
+- Success: 200/201/204 as appropriate, with realistic data (not "string" or 0)
+- 400 validation error with 2 variants (e.g. missing required field, invalid type or negative quantity)
+- 401 missing/invalid token
+- 404 resource not found
+- 409 conflict (duplicate SKU on POST /items)
+- 422 business-rule violation (issuing more stock than available on POST /stock-movements), with a named example for an issue that exceeds available stock
+Use a single shared Error schema ({code, message, details[]}) and a ListResponse wrapper with pagination metadata (page, pageSize, total).
+
+CONSISTENCY
+- Use the same sample data across examples (e.g. SKU "WIDGET-001", location "WH-EAST") so request and response examples line up and chained requests make sense
+- Use ISO 8601 timestamps, UUIDs for ids, camelCase property names
+
+OUTPUT
+- Validate the spec for errors, then fix any issues
+- Briefly summarize the endpoints and the example names per operation
