@@ -1,0 +1,5 @@
+extends: spectral:oas
+rules:
+  # This spec intentionally uses invalid payloads as named examples (e.g. missingRequiredField,
+  # invalidSku) to document 400/409 error responses — they're correct by design, not spec bugs.
+  oas3-valid-media-example: off

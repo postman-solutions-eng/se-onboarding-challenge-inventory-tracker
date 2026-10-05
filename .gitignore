@@ -1,6 +1,10 @@
 
 
 ### Created by https://www.gitignore.io
+### Claude Code ###
+CLAUDE.local.md
+.claude/settings.local.json
+
 ### macOS ###
 # General
 .DS_Store
