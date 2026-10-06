@@ -1,0 +1,42 @@
+Using the Inventory Tracker collection generated from the OpenAPI spec, add Tests-tab
+scripts to every existing request. Do not change the spec. Do not add new folders,
+requests, or restructure the collection — only add scripts and variables to what's
+already there.
+
+1. SCOPE
+- Add tests to every request in every tag folder (Items, Locations, Stock, Movements,
+  System) exactly as currently generated. Leave folder/request structure untouched.
+
+2. RE-RUN SAFETY (do this before anything else)
+- POST /items and POST /locations currently use the spec's literal example values
+  (sku: WIDGET-001, code: WH-EAST), which will 409 on every run after the first.
+  Add a collection-level pre-request script that generates a unique sku
+  (WIDGET-<timestamp>) and locationCode (WH-<timestamp>), and use {{sku}}/{{locationCode}}
+  in place of the hardcoded values in both request bodies.
+
+3. MINIMAL CHAINING (only enough to make path-param requests resolve)
+- POST /locations: save the returned id as {{locationId}}.
+- POST /items: save the returned id as {{itemId}}.
+- Replace every hardcoded path/body id in GET/PATCH/DELETE /items/{itemId},
+  GET /items/{itemId}/stock, and GET /locations/{locationId} with {{itemId}}/{{locationId}}.
+- Do not add quantity/stock-level chaining or multi-request business assertions — that's
+  the e2e suite's job, not this one.
+
+4. ASSERTIONS (every request)
+- Status code matches the response currently saved as that request's example.
+- Content-Type is application/json (except 204 DELETE responses).
+- Response time under 1000 ms.
+- Response body validates against the matching schema from the spec (Item, Location,
+  the relevant list wrapper, StockMovementResponse, or Error) — use the linked API
+  schema, not a hand-rolled copy.
+- For paginated list responses (GET /items, /locations, /stock-movements): assert
+  `data` is an array and `pagination` has page, pageSize, total.
+
+5. CONSISTENCY
+- Reuse {{baseUrl}} and {{token}} exactly as already defined in the environment —
+  don't introduce new auth variables.
+
+6. OUTPUT
+- Run the collection once with the collection runner against the current environment
+  and report which requests passed or failed.
+- List every variable added or modified and which request reads/writes it.
