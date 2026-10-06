@@ -1,0 +1,20 @@
+id: 01a10ed1-de57-73ce-9990-567f82cf59ab
+version: 1
+name: Inventory Tracker Mock
+slug: new-mock-6ee77
+enableSession: true
+protocol: http
+port: 4500
+autoRestartOnChange: true
+logging:
+  level: verbose
+  showBody: true
+associations:
+  - entityType: collection
+    entityId: b4FbEAF0ee9e2Cf58d26e8d2
+    relation: source
+    syncEnabled: true
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true
