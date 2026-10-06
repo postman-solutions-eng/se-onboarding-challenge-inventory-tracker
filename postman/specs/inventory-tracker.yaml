@@ -335,6 +335,11 @@ paths:
                 value:
                   code: 'wh east'
                   name: East Warehouse
+              duplicateCode:
+                summary: 'Duplicate location code already in system — triggers 409'
+                value:
+                  code: WH-EAST
+                  name: East Warehouse
       responses:
         '201':
           description: Location successfully created
@@ -372,6 +377,21 @@ paths:
                         issue: 'must match pattern ^[A-Z0-9][A-Z0-9\-]{1,19}$'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: 'Conflict — a location with this code already exists'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                duplicateCode:
+                  summary: Duplicate location code
+                  value:
+                    code: CONFLICT
+                    message: A location with code WH-EAST already exists
+                    details:
+                      - field: code
+                        issue: Location code must be unique across all locations
 
   /locations/{locationId}:
     parameters:

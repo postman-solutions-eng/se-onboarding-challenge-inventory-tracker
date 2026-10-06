@@ -1,0 +1,11 @@
+$kind: collection
+description: |
+  A simple Inventory Tracker API for managing items, warehouse locations, stock levels, and stock movements (receive, issue, adjust).
+variables:
+  baseUrl: http://localhost:3000
+auth:
+  - id: d066253b-c8cb-4bab-aa0a-7347510e9b66
+    type: bearer
+    name: bearer auth
+    credentials:
+      token: "{{bearerToken}}"

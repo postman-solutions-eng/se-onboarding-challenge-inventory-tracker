@@ -1,0 +1,12 @@
+$kind: http-request
+description: Returns the operational status of the service. No authentication required.
+url: "{{baseUrl}}/health"
+method: GET
+headers:
+  Accept: application/json
+body:
+  type: text
+  content: ""
+settings: {}
+examples: ./.resources/System health check.resources/examples
+order: 1000

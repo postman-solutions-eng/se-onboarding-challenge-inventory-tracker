@@ -1,0 +1,71 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/items/:itemId"
+  method: DELETE
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  pathVariables:
+    - key: itemId
+      value: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      disabled: false
+      description: Unique identifier of the item (UUID)
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "code": "NOT_FOUND",
+        "message": "Item a1b2c3d4-e5f6-7890-abcd-ef1234567890 was not found",
+        "details": []
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "VALIDATION_ERROR",
+            "description": "Machine-readable error code"
+          },
+          "message": {
+            "type": "string",
+            "example": "Request body contains invalid data",
+            "description": "Human-readable description of the error"
+          },
+          "details": {
+            "type": "array",
+            "description": "Optional list of field-level error details",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "sku",
+                  "description": "The field or path that caused the error"
+                },
+                "issue": {
+                  "type": "string",
+                  "example": "required field is missing",
+                  "description": "Description of the specific validation failure"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      }
+order: 3000

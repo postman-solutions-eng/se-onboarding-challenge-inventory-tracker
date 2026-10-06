@@ -1,0 +1,80 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/items/:itemId/stock?page=1&pageSize=20"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  queryParams:
+    - key: page
+      value: "1"
+      disabled: false
+      description: Page number for pagination (1-based)
+    - key: pageSize
+      value: "20"
+      disabled: false
+      description: Number of results per page
+  pathVariables:
+    - key: itemId
+      value: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      disabled: false
+      description: Unique identifier of the item (UUID)
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 401
+  statusText: Unauthorized
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "code": "UNAUTHORIZED",
+        "message": "Authorization header is required",
+        "details": []
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "VALIDATION_ERROR",
+            "description": "Machine-readable error code"
+          },
+          "message": {
+            "type": "string",
+            "example": "Request body contains invalid data",
+            "description": "Human-readable description of the error"
+          },
+          "details": {
+            "type": "array",
+            "description": "Optional list of field-level error details",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "example": "sku",
+                  "description": "The field or path that caused the error"
+                },
+                "issue": {
+                  "type": "string",
+                  "example": "required field is missing",
+                  "description": "Description of the specific validation failure"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      }
+order: 2000

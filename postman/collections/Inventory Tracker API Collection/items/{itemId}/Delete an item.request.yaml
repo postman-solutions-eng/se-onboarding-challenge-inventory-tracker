@@ -1,0 +1,30 @@
+$kind: http-request
+description: Permanently removes an item from the inventory catalog.
+url: "{{baseUrl}}/items/:itemId"
+method: DELETE
+headers:
+  Accept: application/json
+pathVariables:
+  - key: itemId
+    value: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    disabled: false
+    description: Unique identifier of the item (UUID)
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+settings: {}
+examples: ./.resources/Delete an item.resources/examples
+order: 3000

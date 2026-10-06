@@ -1,0 +1,190 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/items?page=1&pageSize=20&status=active&search=widget"
+  method: GET
+  headers:
+    - key: Accept
+      value: application/json
+    - key: Authorization
+      value: Bearer <token>
+      description: "Added as a part of security scheme: bearer"
+  queryParams:
+    - key: page
+      value: "1"
+      disabled: false
+      description: Page number for pagination (1-based)
+    - key: pageSize
+      value: "20"
+      disabled: false
+      description: Number of results per page
+    - key: status
+      value: active
+      disabled: false
+      description: Filter items by lifecycle status
+    - key: search
+      value: widget
+      disabled: false
+      description: Search items by name (case-insensitive substring match)
+  body:
+    type: text
+    content: ""
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "data": [
+          {
+            "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "sku": "WIDGET-001",
+            "name": "Blue Widget",
+            "description": "A high-quality blue widget for industrial use",
+            "unit": "each",
+            "reorderThreshold": 10,
+            "status": "active",
+            "createdAt": "2025-01-15T09:00:00Z",
+            "updatedAt": "2025-06-01T14:30:00Z"
+          },
+          {
+            "id": "d4e5f6a7-b8c9-0123-def0-234567890123",
+            "sku": "GADGET-002",
+            "name": "Red Gadget",
+            "description": "A compact red gadget for assembly lines",
+            "unit": "each",
+            "reorderThreshold": 5,
+            "status": "active",
+            "createdAt": "2025-02-20T10:00:00Z",
+            "updatedAt": "2025-05-10T11:00:00Z"
+          }
+        ],
+        "pagination": {
+          "page": 1,
+          "pageSize": 20,
+          "total": 2
+        }
+      }
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "sku": {
+                      "type": "string",
+                      "pattern": "^[A-Z0-9][A-Z0-9\\-]{2,29}$",
+                      "example": "WIDGET-001",
+                      "description": "Stock Keeping Unit — unique product code (uppercase alphanumeric with hyphens, e.g. WIDGET-001)"
+                    },
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200,
+                      "example": "Blue Widget",
+                      "description": "Human-readable item name"
+                    },
+                    "description": {
+                      "type": "string",
+                      "example": "A high-quality blue widget for industrial use",
+                      "description": "Optional detailed description of the item"
+                    },
+                    "unit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 50,
+                      "example": "each",
+                      "description": "Unit of measure (e.g. each, kg, liter, box)"
+                    },
+                    "reorderThreshold": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "example": 10,
+                      "description": "Stock level at or below which a reorder should be triggered"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "active",
+                        "discontinued"
+                      ],
+                      "example": "active",
+                      "description": "Lifecycle status of the item"
+                    }
+                  },
+                  "required": [
+                    "sku",
+                    "name",
+                    "unit"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                      "description": "Server-generated unique item identifier",
+                      "format": "uuid"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "example": "2025-01-15T09:00:00Z",
+                      "description": "ISO 8601 timestamp when the item was created",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "example": "2025-06-01T14:30:00Z",
+                      "description": "ISO 8601 timestamp when the item was last updated",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                }
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "example": 1,
+                "description": "Current page number (1-based)"
+              },
+              "pageSize": {
+                "type": "integer",
+                "example": 20,
+                "description": "Maximum number of results per page"
+              },
+              "total": {
+                "type": "integer",
+                "example": 42,
+                "description": "Total number of matching records across all pages"
+              }
+            },
+            "required": [
+              "page",
+              "pageSize",
+              "total"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      }
+order: 1000

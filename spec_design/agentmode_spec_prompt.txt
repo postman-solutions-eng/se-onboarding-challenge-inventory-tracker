@@ -38,7 +38,7 @@ For each operation, document realistic responses with named examples:
 - 400 validation error with 2 variants (e.g. missing required field, invalid type or negative quantity)
 - 401 missing/invalid token
 - 404 resource not found
-- 409 conflict (duplicate SKU on POST /items)
+- 409 conflict (duplicate SKU on POST /items, duplicate code on POST /locations)
 - 422 business-rule violation (issuing more stock than available on POST /stock-movements), with a named example for an issue that exceeds available stock
 Use a single shared Error schema ({code, message, details[]}) and a ListResponse wrapper with pagination metadata (page, pageSize, total).
 

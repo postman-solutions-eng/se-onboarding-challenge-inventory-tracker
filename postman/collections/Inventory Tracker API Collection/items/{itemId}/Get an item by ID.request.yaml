@@ -1,0 +1,30 @@
+$kind: http-request
+description: Returns the full details of a single inventory item.
+url: "{{baseUrl}}/items/:itemId"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: itemId
+    value: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    disabled: false
+    description: Unique identifier of the item (UUID)
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: text
+  content: ""
+settings: {}
+examples: ./.resources/Get an item by ID.resources/examples
+order: 1000
