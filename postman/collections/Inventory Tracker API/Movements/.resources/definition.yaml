@@ -1,3 +1,0 @@
-$kind: collection
-description: Record and query stock movements (receive, issue, adjust).
-order: 4000

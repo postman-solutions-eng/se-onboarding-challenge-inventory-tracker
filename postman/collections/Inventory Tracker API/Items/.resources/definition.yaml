@@ -1,3 +1,0 @@
-$kind: collection
-description: Manage inventory items — SKU, name, unit, reorder threshold, and lifecycle status.
-order: 1000
