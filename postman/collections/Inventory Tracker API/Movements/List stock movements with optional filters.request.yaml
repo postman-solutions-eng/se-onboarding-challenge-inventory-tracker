@@ -1,0 +1,118 @@
+$kind: http-request
+description: Returns a paginated list of stock movements, optionally filtered by item, location, type, or date range.
+url: "{{baseUrl}}/stock-movements?page=1&pageSize=20&itemId=a1b2c3d4-e5f6-7890-abcd-ef1234567890&locationId=b2c3d4e5-f6a7-8901-bcde-f12345678901&type=receive&dateFrom=2025-01-01T00:00:00Z&dateTo=2025-12-31T23:59:59Z"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: page
+    value: "1"
+    disabled: false
+    description: Page number for pagination (1-based)
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          }
+        }
+      }
+  - key: pageSize
+    value: "20"
+    disabled: false
+    description: Number of results per page
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      }
+  - key: itemId
+    value: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    disabled: false
+    description: Filter movements by item ID (UUID)
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+  - key: locationId
+    value: b2c3d4e5-f6a7-8901-bcde-f12345678901
+    disabled: false
+    description: Filter movements by location ID (UUID)
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      }
+  - key: type
+    value: receive
+    disabled: false
+    description: Filter movements by movement type
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "enum": [
+              "receive",
+              "issue",
+              "adjust"
+            ]
+          }
+        }
+      }
+  - key: dateFrom
+    value: 2025-01-01T00:00:00Z
+    disabled: false
+    description: Return movements recorded at or after this ISO 8601 date-time
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+  - key: dateTo
+    value: 2025-12-31T23:59:59Z
+    disabled: false
+    description: Return movements recorded at or before this ISO 8601 date-time
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+settings: {}
+examples: ./.resources/List stock movements with optional filters.resources/examples
+order: 2000

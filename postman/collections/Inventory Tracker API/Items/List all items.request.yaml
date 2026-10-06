@@ -1,0 +1,66 @@
+$kind: http-request
+description: Returns a paginated list of inventory items with optional filtering by status and name search.
+url: "{{baseUrl}}/items?page=1&pageSize=20&status=active&search=widget"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: page
+    value: "1"
+    disabled: false
+    description: Page number for pagination (1-based)
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          }
+        }
+      }
+  - key: pageSize
+    value: "20"
+    disabled: false
+    description: Number of results per page
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      }
+  - key: status
+    value: active
+    disabled: false
+    description: Filter items by lifecycle status
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "enum": [
+              "active",
+              "discontinued"
+            ]
+          }
+        }
+      }
+  - key: search
+    value: widget
+    disabled: false
+    description: Search items by name (case-insensitive substring match)
+    $type: string
+body:
+  type: text
+  content: ""
+settings: {}
+examples: ./.resources/List all items.resources/examples
+order: 1000

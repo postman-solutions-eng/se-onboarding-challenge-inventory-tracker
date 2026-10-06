@@ -1,0 +1,44 @@
+$kind: http-request
+description: Returns a paginated list of all warehouse and bin locations.
+url: "{{baseUrl}}/locations?page=1&pageSize=20"
+method: GET
+headers:
+  Accept: application/json
+queryParams:
+  - key: page
+    value: "1"
+    disabled: false
+    description: Page number for pagination (1-based)
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "default": 1,
+            "minimum": 1
+          }
+        }
+      }
+  - key: pageSize
+    value: "20"
+    disabled: false
+    description: Number of results per page
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "default": 20,
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      }
+body:
+  type: text
+  content: ""
+settings: {}
+examples: ./.resources/List all locations.resources/examples
+order: 1000

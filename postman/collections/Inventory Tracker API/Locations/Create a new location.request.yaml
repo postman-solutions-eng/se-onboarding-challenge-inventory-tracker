@@ -1,0 +1,45 @@
+$kind: http-request
+description: Creates a new warehouse or bin location. The location code must be unique.
+url: "{{baseUrl}}/locations"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "code": "WH-EAST",
+      "name": "East Warehouse"
+    }
+  $type: |-
+    {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z0-9][A-Z0-9\\-]{1,19}$",
+          "example": "WH-EAST",
+          "description": "Short unique location code (uppercase alphanumeric with hyphens, e.g. WH-EAST, BIN-A01)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "example": "East Warehouse",
+          "description": "Human-readable location name"
+        },
+        "description": {
+          "type": "string",
+          "example": "Main receiving warehouse on the east side of the campus",
+          "description": "Optional address or notes about the location"
+        }
+      },
+      "required": [
+        "code",
+        "name"
+      ]
+    }
+settings: {}
+examples: ./.resources/Create a new location.resources/examples
+order: 2000
