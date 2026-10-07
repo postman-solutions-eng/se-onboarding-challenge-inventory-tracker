@@ -1,0 +1,19 @@
+$kind: collection
+name: E2E Happy Path
+order: 1000
+description: |-
+  End-to-end happy path: creates a location and item, receives 100 units,
+  verifies stock, issues 30 units, verifies the updated stock, checks movement
+  history, then cleans up. Steps 3–8 abort the run via pm.execution.setNextRequest(null)
+  if itemId or locationId is missing.
+scripts:
+  - type: http:beforeRequest
+    language: text/javascript
+    code: |-
+      // Promote E2E collection variables to local scope (highest priority)
+      // so {{itemId}} / {{locationId}} in request URLs and bodies use the
+      // dynamically-created UUIDs rather than the environment's static test IDs.
+      ['itemId', 'locationId', 'receiveMovementId', 'issueMovementId'].forEach(key => {
+          const val = pm.collectionVariables.get(key);
+          if (val) pm.variables.set(key, val);
+      });

@@ -1,0 +1,12 @@
+$kind: collection
+name: Failure Cases
+order: 2000
+description: |-
+  Error scenario tests. Each request is self-contained.
+
+  For 409 (Duplicate SKU, Duplicate location code) and 422 (Issue exceeds stock),
+  the pre-request script creates the necessary temporary data via pm.sendRequest
+  before the actual failure request is sent. These tests do NOT depend on the
+  E2E Happy Path variables.
+
+  Assumption: {{baseUrl}} and {{apiKey}} environment variables must be set.

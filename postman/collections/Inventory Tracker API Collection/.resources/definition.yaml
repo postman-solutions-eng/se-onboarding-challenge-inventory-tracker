@@ -13,10 +13,9 @@ variables:
 scripts:
   - type: http:beforeRequest
     code: |-
-      // Generate unique SKU and location code before every request.
-      // Because {{sku}} is only consumed by POST /items and {{locationCode}} only by
-      // POST /locations, regenerating on each pre-request is safe and guarantees
-      // re-run safety (no 409 Conflict on repeat runs).
+      // Always generate a fresh timestamp-based SKU and location code before every request.
+      // sku is only consumed by POST /items (step 02) and locationCode by POST /locations (step 01),
+      // so regenerating on each pre-request is safe and prevents 409 conflicts across runs.
       const ts = Date.now();
       pm.collectionVariables.set('sku', 'WIDGET-' + ts);
       pm.collectionVariables.set('locationCode', 'WH-' + ts);

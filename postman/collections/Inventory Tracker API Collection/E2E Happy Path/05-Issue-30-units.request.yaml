@@ -1,0 +1,64 @@
+$kind: http-request
+name: '05 – Issue 30 units'
+order: 5000
+url: '{{baseUrl}}/stock-movements'
+method: POST
+headers:
+  'x-api-key': '{{apiKey}}'
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "type": "issue",
+      "itemId": "{{itemId}}",
+      "locationId": "{{locationId}}",
+      "quantity": 30
+    }
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      if (!pm.collectionVariables.get('itemId') || !pm.collectionVariables.get('locationId')) {
+          pm.execution.setNextRequest(null);
+          throw new Error('Fail-fast: itemId or locationId is missing.');
+      }
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 201', () => {
+          pm.response.to.have.status(201);
+      });
+      pm.test('Content-Type is application/json', () => {
+          pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      pm.test('Response body matches StockMovement schema', () => {
+          pm.response.to.have.jsonSchema({
+              type: 'object',
+              required: ['id', 'type', 'itemId', 'locationId', 'quantity'],
+              properties: {
+                  id: { type: 'string' },
+                  type: { type: 'string', enum: ['receive', 'issue', 'adjust'] },
+                  itemId: { type: 'string' },
+                  locationId: { type: 'string' },
+                  quantity: { type: 'number' }
+              }
+          });
+      });
+      pm.test('Type equals "issue"', () => {
+          pm.expect(pm.response.json().type).to.equal('issue');
+      });
+      pm.test('Quantity equals 30', () => {
+          pm.expect(pm.response.json().quantity).to.equal(30);
+      });
+      pm.test('issueMovementId is present and saved', () => {
+          const json = pm.response.json();
+          pm.expect(json, 'Response must contain id').to.have.property('id');
+          pm.expect(json.id, 'id must be a non-empty string').to.be.a('string').and.not.empty;
+          pm.collectionVariables.set('issueMovementId', json.id);
+      });
+settings: {}

@@ -1,0 +1,33 @@
+$kind: http-request
+name: '08 – Delete item (cleanup)'
+order: 8000
+url: '{{baseUrl}}/items/:itemId'
+method: DELETE
+headers:
+  'x-api-key': '{{apiKey}}'
+  Accept: application/json
+pathVariables:
+  - key: itemId
+    value: '{{itemId}}'
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      if (!pm.collectionVariables.get('itemId') || !pm.collectionVariables.get('locationId')) {
+          pm.execution.setNextRequest(null);
+          throw new Error('Fail-fast: itemId or locationId is missing.');
+      }
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 204', () => {
+          pm.response.to.have.status(204);
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      // Cleanup: unset all E2E run variables so the next run starts fresh
+      ['itemId', 'locationId', 'sku', 'locationCode', 'receiveMovementId', 'issueMovementId'].forEach(v => {
+          pm.collectionVariables.unset(v);
+      });
+settings: {}

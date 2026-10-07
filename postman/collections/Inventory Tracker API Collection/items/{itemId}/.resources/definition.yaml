@@ -1,3 +1,12 @@
 $kind: collection
 description: ""
 order: 3000
+scripts:
+  - type: http:beforeRequest
+    language: text/javascript
+    code: |-
+      // Promote collection variable itemId (set by "Create a new item" which runs at order 2000)
+      // to local scope (highest priority) so {{itemId}} uses the freshly-created item's UUID
+      // rather than the static environment value.
+      const val = pm.collectionVariables.get('itemId');
+      if (val) pm.variables.set('itemId', val);

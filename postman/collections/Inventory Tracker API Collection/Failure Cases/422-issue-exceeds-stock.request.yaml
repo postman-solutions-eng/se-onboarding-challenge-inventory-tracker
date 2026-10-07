@@ -1,0 +1,83 @@
+$kind: http-request
+name: '422 – Issue exceeds stock'
+order: 6000
+url: '{{baseUrl}}/stock-movements'
+method: POST
+headers:
+  'x-api-key': '{{apiKey}}'
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "type": "issue",
+      "itemId": "PLACEHOLDER",
+      "locationId": "PLACEHOLDER",
+      "quantity": 9999
+    }
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      // Self-contained setup: create item + location, receive 5 units, then issue 9999 (triggers 422)
+      const ts = Date.now();
+      const failSku = 'FAIL-422-' + ts;
+      const failCode = 'F422-' + ts;
+
+      pm.sendRequest({
+          url: pm.environment.get('baseUrl') + '/items',
+          method: 'POST',
+          header: { 'x-api-key': pm.environment.get('apiKey'), 'Content-Type': 'application/json' },
+          body: { mode: 'raw', raw: JSON.stringify({ sku: failSku, name: 'Temp 422 Item', unit: 'each' }) }
+      }, (err1, res1) => {
+          if (err1 || res1.code !== 201) { console.error('422 setup step 1 (create item) failed'); return; }
+          const tempItemId = res1.json().id;
+
+          pm.sendRequest({
+              url: pm.environment.get('baseUrl') + '/locations',
+              method: 'POST',
+              header: { 'x-api-key': pm.environment.get('apiKey'), 'Content-Type': 'application/json' },
+              body: { mode: 'raw', raw: JSON.stringify({ code: failCode, name: 'Temp 422 Location' }) }
+          }, (err2, res2) => {
+              if (err2 || res2.code !== 201) { console.error('422 setup step 2 (create location) failed'); return; }
+              const tempLocationId = res2.json().id;
+
+              pm.sendRequest({
+                  url: pm.environment.get('baseUrl') + '/stock-movements',
+                  method: 'POST',
+                  header: { 'x-api-key': pm.environment.get('apiKey'), 'Content-Type': 'application/json' },
+                  body: { mode: 'raw', raw: JSON.stringify({ type: 'receive', itemId: tempItemId, locationId: tempLocationId, quantity: 5 }) }
+              }, (err3, res3) => {
+                  if (err3 || res3.code !== 201) { console.error('422 setup step 3 (receive stock) failed'); return; }
+                  pm.request.body.update({
+                      mode: 'raw',
+                      raw: JSON.stringify({ type: 'issue', itemId: tempItemId, locationId: tempLocationId, quantity: 9999 })
+                  });
+              });
+          });
+      });
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 422', () => {
+          pm.response.to.have.status(422);
+      });
+      pm.test('Content-Type is application/json', () => {
+          pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      pm.test('Response body matches Error schema', () => {
+          pm.response.to.have.jsonSchema({
+              type: 'object',
+              required: ['code', 'message'],
+              properties: {
+                  code: { type: 'string' },
+                  message: { type: 'string' },
+                  details: {}
+              }
+          });
+      });
+settings: {}

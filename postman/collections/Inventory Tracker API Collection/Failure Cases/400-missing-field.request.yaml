@@ -1,0 +1,40 @@
+$kind: http-request
+name: '400 – Missing required field'
+order: 1000
+url: '{{baseUrl}}/items'
+method: POST
+headers:
+  'x-api-key': '{{apiKey}}'
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Item Missing SKU and Unit"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 400', () => {
+          pm.response.to.have.status(400);
+      });
+      pm.test('Content-Type is application/json', () => {
+          pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      pm.test('Response body matches Error schema', () => {
+          pm.response.to.have.jsonSchema({
+              type: 'object',
+              required: ['code', 'message'],
+              properties: {
+                  code: { type: 'string' },
+                  message: { type: 'string' },
+                  details: {}
+              }
+          });
+      });
+settings: {}
