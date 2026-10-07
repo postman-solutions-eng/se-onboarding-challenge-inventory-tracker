@@ -1,3 +1,6 @@
 $kind: collection
-description: ""
+description: |-
+  A single `GET /health` request that confirms the API server is reachable and healthy.
+
+  Run this before any other folder to verify connectivity and that `{{baseUrl}}` is configured correctly. A `200 OK` with a healthy status payload means the service is ready to handle requests.
 order: 1000

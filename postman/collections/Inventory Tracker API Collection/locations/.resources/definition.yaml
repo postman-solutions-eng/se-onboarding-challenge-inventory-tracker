@@ -1,3 +1,12 @@
 $kind: collection
-description: ""
+description: |-
+  Manage the physical storage locations where inventory is held (e.g. warehouses, bins, shelves).
+
+  | Request | Method | Endpoint |
+  |---|---|---|
+  | List all locations | `GET` | `/locations` |
+  | Create a new location | `POST` | `/locations` |
+  | Get a location by ID | `GET` | `/locations/{locationId}` |
+
+  Each location has a unique `code` (auto-generated as `WH-<timestamp>` by the collection pre-request script) and a human-readable name. The `locationId` collection variable is captured automatically after a successful Create and referenced by stock movement requests.
 order: 3000

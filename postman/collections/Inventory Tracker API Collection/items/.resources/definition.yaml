@@ -1,3 +1,15 @@
 $kind: collection
-description: ""
+description: |-
+  Full CRUD for inventory items — the core catalogue of products tracked by the system.
+
+  | Request | Method | Endpoint |
+  |---|---|---|
+  | List all items | `GET` | `/items` |
+  | Create a new item | `POST` | `/items` |
+  | Get an item by ID | `GET` | `/items/{itemId}` |
+  | Partially update an item | `PATCH` | `/items/{itemId}` |
+  | Delete an item | `DELETE` | `/items/{itemId}` |
+  | Check current stock level | `GET` | `/items/{itemId}/stock` |
+
+  Each item has a unique SKU, a unit of measure, and an optional reorder threshold. The `itemId` collection variable is auto-populated by the Create request and reused by subsequent requests in this folder.
 order: 2000

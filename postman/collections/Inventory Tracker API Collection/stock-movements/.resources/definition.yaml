@@ -1,3 +1,19 @@
 $kind: collection
-description: ""
+description: |-
+  Record and query all stock transactions. Every change to inventory levels goes through a stock movement.
+
+  | Request | Method | Endpoint |
+  |---|---|---|
+  | Record a stock movement | `POST` | `/stock-movements` |
+  | List movements with optional filters | `GET` | `/stock-movements` |
+
+  The `type` field on the POST request is a discriminator with three variants:
+
+  | Type | Effect |
+  |---|---|
+  | `receive` | Adds stock to a location (quantity must be ≥ 1) |
+  | `issue` | Removes stock from a location (cannot take stock below zero) |
+  | `adjust` | Applies a signed nonzero delta — requires a `reason` (e.g. cycle count, damage) |
+
+  The GET endpoint accepts optional query filters such as `itemId`, `locationId`, and date range to narrow the movement history.
 order: 4000

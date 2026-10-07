@@ -1,0 +1,9 @@
+$kind: collection
+description: |-
+  Authentication guard tests. These two requests verify that the API correctly enforces API key authentication:
+
+  - **401 – No API key** — sends a request with no `X-API-Key` header and expects a `401 Unauthorized` response.
+  - **401 – Invalid API key** — sends a request with a deliberately wrong key and expects the same `401` rejection.
+
+  These tests are intentionally independent of `{{apiKey}}` being valid, so they can run in any environment.
+order: 1500

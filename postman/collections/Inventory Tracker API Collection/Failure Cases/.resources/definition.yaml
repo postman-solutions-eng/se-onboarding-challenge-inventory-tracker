@@ -1,12 +1,19 @@
 $kind: collection
 name: Failure Cases
-order: 2000
+order: 6000
 description: |-
-  Error scenario tests. Each request is self-contained.
+  Error-path tests that verify the API returns the correct HTTP error codes for invalid or conflicting requests. Each request is fully self-contained and can be run independently.
 
-  For 409 (Duplicate SKU, Duplicate location code) and 422 (Issue exceeds stock),
-  the pre-request script creates the necessary temporary data via pm.sendRequest
-  before the actual failure request is sent. These tests do NOT depend on the
-  E2E Happy Path variables.
+  | Request | Expected status | Scenario |
+  |---|---|---|
+  | 400 – Missing field | `400 Bad Request` | Required field omitted from the request body |
+  | 400 – Invalid quantity | `400 Bad Request` | Quantity value fails validation (e.g. zero or negative) |
+  | 401 – Missing token | `401 Unauthorized` | Request sent with no API key |
+  | 404 – Unknown itemId | `404 Not Found` | Operation attempted on a non-existent item ID |
+  | 409 – Duplicate SKU | `409 Conflict` | Attempt to create an item with a SKU that already exists |
+  | 409 – Duplicate location code | `409 Conflict` | Attempt to create a location with a code that already exists |
+  | 422 – Issue exceeds stock | `422 Unprocessable Entity` | Issue quantity is greater than available stock |
 
-  Assumption: {{baseUrl}} and {{apiKey}} environment variables must be set.
+  For the `409` and `422` cases, a pre-request script uses `pm.sendRequest` to create the necessary seed data before the failure request is sent. These tests do **not** depend on variables set by the E2E Happy Path folder.
+
+  **Prerequisites:** `{{baseUrl}}` and `{{apiKey}}` must be set in the active environment.

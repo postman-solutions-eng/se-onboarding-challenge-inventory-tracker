@@ -1,4 +1,39 @@
 $kind: collection
+description: |-
+  # Inventory Tracker API Collection
+
+  A complete test suite for the **Inventory Tracker API** — a RESTful service for managing warehouse stock across multiple locations.
+
+  ## What this collection covers
+
+  | Folder | Purpose |
+  |---|---|
+  | **health** | Verify the service is up and responding |
+  | **auth** | Confirm that missing or invalid API keys are rejected with `401` |
+  | **items** | Full CRUD for inventory items (create, list, get, update, delete) and stock-level lookup |
+  | **locations** | Create and retrieve warehouse locations |
+  | **stock-movements** | Record and query stock movements — receive (add stock), issue (remove stock), or adjust (signed delta with reason) |
+  | **E2E Happy Path** | Ordered 8-step end-to-end scenario: create a location → create an item → receive 100 units → verify stock → issue 30 units → verify stock → list movements → clean up |
+  | **Failure Cases** | 7 error-path requests covering `400`, `401`, `404`, `409`, and `422` responses |
+
+  ## Authentication
+
+  Every request uses an **API key** sent in the `X-API-Key` header. Set the `apiKey` variable in the active environment before running.
+
+  ## Key variables
+
+  | Variable | Scope | Description |
+  |---|---|---|
+  | `baseUrl` | Environment | Root URL of the API (e.g. `http://localhost:3000`) |
+  | `apiKey` | Environment | API key for authentication |
+  | `itemId` | Collection | Auto-captured from the Create Item response |
+  | `locationId` | Collection | Auto-captured from the Create Location response |
+
+  A pre-request script regenerates a unique `sku` and `locationCode` (timestamp-based) before each run to prevent `409` conflicts when the collection is executed multiple times.
+
+  ## Running the collection
+
+  Run the **E2E Happy Path** folder for a full end-to-end smoke test, or run individual resource folders to test specific endpoints. The **Failure Cases** folder can be run independently to validate error handling.
 auth:
   type: apikey
   credentials:
