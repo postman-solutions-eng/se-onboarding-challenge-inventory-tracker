@@ -3,10 +3,11 @@ description: Returns the full details of a single inventory item.
 url: "{{baseUrl}}/items/:itemId"
 method: GET
 headers:
+  'x-api-key': '{{apiKey}}'
   Accept: application/json
 pathVariables:
   - key: itemId
-    value: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    value: '{{itemId}}'
     disabled: false
     description: Unique identifier of the item (UUID)
     $type: |-
@@ -25,6 +26,34 @@ pathVariables:
 body:
   type: text
   content: ""
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', () => {
+          pm.response.to.have.status(200);
+      });
+      pm.test('Content-Type is application/json', () => {
+          pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      pm.test('Response body matches Item schema', () => {
+          pm.response.to.have.jsonSchema({
+              type: 'object',
+              required: ['id', 'sku', 'name', 'unit', 'status'],
+              properties: {
+                  id: { type: 'string' },
+                  sku: { type: 'string' },
+                  name: { type: 'string' },
+                  unit: { type: 'string' },
+                  status: { type: 'string' },
+                  createdAt: { type: 'string' },
+                  updatedAt: { type: 'string' }
+              }
+          });
+      });
 settings: {}
 examples: ./.resources/Get an item by ID.resources/examples
 order: 1000

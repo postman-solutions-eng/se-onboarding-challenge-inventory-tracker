@@ -1,0 +1,38 @@
+$kind: http-request
+description: 'Verifies that a request without the x-api-key header is rejected with 401 Unauthorized.'
+url: '{{baseUrl}}/items'
+method: GET
+auth:
+  type: noauth
+headers:
+  - key: Accept
+    value: application/json
+order: 1000
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 401 when API key is missing', () => {
+          pm.response.to.have.status(401);
+      });
+      pm.test('Content-Type is application/json', () => {
+          pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      pm.test('Error body matches schema', () => {
+          pm.response.to.have.jsonSchema({
+              type: 'object',
+              required: ['code', 'message', 'details'],
+              properties: {
+                  code: { type: 'string' },
+                  message: { type: 'string' },
+                  details: { type: 'array' }
+              }
+          });
+      });
+      pm.test('Error code is UNAUTHORIZED', () => {
+          pm.expect(pm.response.json().code).to.equal('UNAUTHORIZED');
+      });
+settings: {}

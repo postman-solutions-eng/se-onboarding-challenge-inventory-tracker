@@ -4,11 +4,32 @@
 const http = require('http');
 const PORT = process.env.PORT || 4500;
 
+// API Key validation
+// Set API_KEY environment variable to enforce a specific key.
+// If not set, any non-empty x-api-key header value is accepted.
+const VALID_API_KEY = process.env.API_KEY || null;
+
+function checkApiKey(req, res) {
+  const apiKey = req.headers['x-api-key'];
+  // Reject if header is missing, empty, or an unresolved Postman variable (e.g. {{apiKey}})
+  if (!apiKey || /^\{\{.+\}\}$/.test(apiKey)) {
+    res.writeHead(401, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({"code":"UNAUTHORIZED","message":"x-api-key header is required","details":[]}));
+    return false;
+  }
+  if (VALID_API_KEY && apiKey !== VALID_API_KEY) {
+    res.writeHead(401, {'Content-Type': 'application/json'});
+    res.end(JSON.stringify({"code":"UNAUTHORIZED","message":"Invalid API key","details":[]}));
+    return false;
+  }
+  return true;
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url || '', 'http://localhost');
   const pathname = url.pathname;
 
-  // @endpoint GET /health
+  // @endpoint GET /health (API key not required)
   if (req.method === 'GET' && pathname === '/health') {
     res.writeHead(200, {"Content-Type":"application/json"});
     return res.end(JSON.stringify({"status":"ok"}));
@@ -16,11 +37,11 @@ const server = http.createServer((req, res) => {
 
   // @endpoint GET /items
   if (req.method === 'GET' && pathname === '/items') {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
-    const query = url.searchParams;
 
-    // "Missing or invalid bearer token" — status 401, when query.get("page") === "1" && query.get("pageSize") === "20" && query.get("status") === "active" && query.get("search") === "widget"
-    if ((!requestedStatusCode || requestedStatusCode === '401') && query.get("page") === "1" && query.get("pageSize") === "20" && query.get("status") === "active" && query.get("search") === "widget") {
+    // "Missing or invalid bearer token" — when x-mock-response-code: 401
+    if (requestedStatusCode === '401') {
       res.writeHead(401, {"Content-Type":"application/json"});
       return res.end(JSON.stringify({"code":"UNAUTHORIZED","message":"Authorization header is required","details":[]}));
     }
@@ -32,6 +53,7 @@ const server = http.createServer((req, res) => {
 
   // @endpoint POST /items
   if (req.method === 'POST' && pathname === '/items') {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
 
     // "Validation error — request body is invalid" — when x-mock-response-code: 400
@@ -59,6 +81,7 @@ const server = http.createServer((req, res) => {
 
   // @endpoint GET /items/:itemId
   if (req.method === 'GET' && /^\/items\/([^/]+)$/.test(pathname)) {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
 
     // "Missing or invalid bearer token" — when x-mock-response-code: 401
@@ -80,6 +103,7 @@ const server = http.createServer((req, res) => {
 
   // @endpoint PATCH /items/:itemId
   if (req.method === 'PATCH' && /^\/items\/([^/]+)$/.test(pathname)) {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
 
     // "Validation error — one or more fields are invalid" — when x-mock-response-code: 400
@@ -107,6 +131,7 @@ const server = http.createServer((req, res) => {
 
   // @endpoint DELETE /items/:itemId
   if (req.method === 'DELETE' && /^\/items\/([^/]+)$/.test(pathname)) {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
 
     // "Missing or invalid bearer token" — when x-mock-response-code: 401
@@ -128,17 +153,17 @@ const server = http.createServer((req, res) => {
 
   // @endpoint GET /items/:itemId/stock
   if (req.method === 'GET' && /^\/items\/([^/]+)\/stock$/.test(pathname)) {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
-    const query = url.searchParams;
 
-    // "Missing or invalid bearer token" — status 401, when query.get("page") === "1" && query.get("pageSize") === "20"
-    if ((!requestedStatusCode || requestedStatusCode === '401') && query.get("page") === "1" && query.get("pageSize") === "20") {
+    // "Missing or invalid bearer token" — when x-mock-response-code: 401
+    if (requestedStatusCode === '401') {
       res.writeHead(401, {"Content-Type":"application/json"});
       return res.end(JSON.stringify({"code":"UNAUTHORIZED","message":"Authorization header is required","details":[]}));
     }
 
-    // "The requested resource was not found" — status 404, when query.get("page") === "1" && query.get("pageSize") === "20"
-    if ((!requestedStatusCode || requestedStatusCode === '404') && query.get("page") === "1" && query.get("pageSize") === "20") {
+    // "The requested resource was not found" — when x-mock-response-code: 404
+    if (requestedStatusCode === '404') {
       res.writeHead(404, {"Content-Type":"application/json"});
       return res.end(JSON.stringify({"code":"NOT_FOUND","message":"Item a1b2c3d4-e5f6-7890-abcd-ef1234567890 was not found","details":[]}));
     }
@@ -150,11 +175,11 @@ const server = http.createServer((req, res) => {
 
   // @endpoint GET /locations
   if (req.method === 'GET' && pathname === '/locations') {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
-    const query = url.searchParams;
 
-    // "Missing or invalid bearer token" — status 401, when query.get("page") === "1" && query.get("pageSize") === "20"
-    if ((!requestedStatusCode || requestedStatusCode === '401') && query.get("page") === "1" && query.get("pageSize") === "20") {
+    // "Missing or invalid bearer token" — when x-mock-response-code: 401
+    if (requestedStatusCode === '401') {
       res.writeHead(401, {"Content-Type":"application/json"});
       return res.end(JSON.stringify({"code":"UNAUTHORIZED","message":"Authorization header is required","details":[]}));
     }
@@ -166,6 +191,7 @@ const server = http.createServer((req, res) => {
 
   // @endpoint POST /locations
   if (req.method === 'POST' && pathname === '/locations') {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
 
     // "Validation error — request body is invalid" — when x-mock-response-code: 400
@@ -193,6 +219,7 @@ const server = http.createServer((req, res) => {
 
   // @endpoint GET /locations/:locationId
   if (req.method === 'GET' && /^\/locations\/([^/]+)$/.test(pathname)) {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
 
     // "Missing or invalid bearer token" — when x-mock-response-code: 401
@@ -214,6 +241,7 @@ const server = http.createServer((req, res) => {
 
   // @endpoint POST /stock-movements
   if (req.method === 'POST' && pathname === '/stock-movements') {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
 
     // "Validation error — request body is invalid" — when x-mock-response-code: 400
@@ -247,11 +275,11 @@ const server = http.createServer((req, res) => {
 
   // @endpoint GET /stock-movements
   if (req.method === 'GET' && pathname === '/stock-movements') {
+    if (!checkApiKey(req, res)) return;
     const requestedStatusCode = req.headers['x-mock-response-code'];
-    const query = url.searchParams;
 
-    // "Missing or invalid bearer token" — status 401, when query.get("page") === "1" && query.get("pageSize") === "20" && query.get("itemId") === "a1b2c3d4-e5f6-7890-abcd-ef1234567890" && query.get("locationId") === "b2c3d4e5-f6a7-8901-bcde-f12345678901" && query.get("type") === "receive" && query.get("dateFrom") === "2025-01-01T00:00:00Z" && query.get("dateTo") === "2025-12-31T23:59:59Z"
-    if ((!requestedStatusCode || requestedStatusCode === '401') && query.get("page") === "1" && query.get("pageSize") === "20" && query.get("itemId") === "a1b2c3d4-e5f6-7890-abcd-ef1234567890" && query.get("locationId") === "b2c3d4e5-f6a7-8901-bcde-f12345678901" && query.get("type") === "receive" && query.get("dateFrom") === "2025-01-01T00:00:00Z" && query.get("dateTo") === "2025-12-31T23:59:59Z") {
+    // "Missing or invalid bearer token" — when x-mock-response-code: 401
+    if (requestedStatusCode === '401') {
       res.writeHead(401, {"Content-Type":"application/json"});
       return res.end(JSON.stringify({"code":"UNAUTHORIZED","message":"Authorization header is required","details":[]}));
     }

@@ -1,11 +1,23 @@
 $kind: collection
-description: |
-  A simple Inventory Tracker API for managing items, warehouse locations, stock levels, and stock movements (receive, issue, adjust).
-variables:
-  baseUrl: http://localhost:3000
 auth:
-  - id: d066253b-c8cb-4bab-aa0a-7347510e9b66
-    type: bearer
-    name: bearer auth
-    credentials:
-      token: "{{bearerToken}}"
+  type: apikey
+  credentials:
+    key: X-API-Key
+    value: "{{apiKey}}"
+    in: header
+variables:
+  sku: ""
+  locationCode: ""
+  itemId: ""
+  locationId: ""
+scripts:
+  - type: http:beforeRequest
+    code: |-
+      // Generate unique SKU and location code before every request.
+      // Because {{sku}} is only consumed by POST /items and {{locationCode}} only by
+      // POST /locations, regenerating on each pre-request is safe and guarantees
+      // re-run safety (no 409 Conflict on repeat runs).
+      const ts = Date.now();
+      pm.collectionVariables.set('sku', 'WIDGET-' + ts);
+      pm.collectionVariables.set('locationCode', 'WH-' + ts);
+    language: text/javascript

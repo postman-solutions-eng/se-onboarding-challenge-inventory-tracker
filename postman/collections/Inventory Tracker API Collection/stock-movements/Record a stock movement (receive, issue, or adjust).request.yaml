@@ -7,6 +7,7 @@ description: |-
 url: "{{baseUrl}}/stock-movements"
 method: POST
 headers:
+  'x-api-key': '{{apiKey}}'
   Content-Type: application/json
   Accept: application/json
 body:
@@ -149,6 +150,34 @@ body:
         }
       ]
     }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 201', () => {
+          pm.response.to.have.status(201);
+      });
+      pm.test('Content-Type is application/json', () => {
+          pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      pm.test('Response body matches StockMovementResponse schema', () => {
+          pm.response.to.have.jsonSchema({
+              type: 'object',
+              required: ['id', 'type', 'itemId', 'locationId', 'quantity'],
+              properties: {
+                  id: { type: 'string' },
+                  type: { type: 'string', enum: ['receive', 'issue', 'adjust'] },
+                  itemId: { type: 'string' },
+                  locationId: { type: 'string' },
+                  quantity: { type: 'number' },
+                  referenceNumber: { type: 'string' },
+                  createdAt: { type: 'string' }
+              }
+          });
+      });
 settings: {}
 examples: ./.resources/Record a stock movement (receive, issue, or adjust).resources/examples
 order: 1000

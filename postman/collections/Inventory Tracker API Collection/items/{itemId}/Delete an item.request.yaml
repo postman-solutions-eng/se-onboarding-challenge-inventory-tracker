@@ -3,10 +3,11 @@ description: Permanently removes an item from the inventory catalog.
 url: "{{baseUrl}}/items/:itemId"
 method: DELETE
 headers:
+  'x-api-key': '{{apiKey}}'
   Accept: application/json
 pathVariables:
   - key: itemId
-    value: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    value: '{{itemId}}'
     disabled: false
     description: Unique identifier of the item (UUID)
     $type: |-
@@ -25,6 +26,16 @@ pathVariables:
 body:
   type: text
   content: ""
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 204', () => {
+          pm.response.to.have.status(204);
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
 settings: {}
 examples: ./.resources/Delete an item.resources/examples
 order: 3000

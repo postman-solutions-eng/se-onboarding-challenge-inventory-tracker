@@ -3,6 +3,7 @@ description: Returns a paginated list of stock movements, optionally filtered by
 url: "{{baseUrl}}/stock-movements?page=1&pageSize=20&itemId=a1b2c3d4-e5f6-7890-abcd-ef1234567890&locationId=b2c3d4e5-f6a7-8901-bcde-f12345678901&type=receive&dateFrom=2025-01-01T00:00:00Z&dateTo=2025-12-31T23:59:59Z"
 method: GET
 headers:
+  'x-api-key': '{{apiKey}}'
   Accept: application/json
 queryParams:
   - key: page
@@ -83,7 +84,7 @@ queryParams:
         }
       }
   - key: dateFrom
-    value: 2025-01-01T00:00:00Z
+    value: '2025-01-01T00:00:00Z'
     disabled: false
     description: Return movements recorded at or after this ISO 8601 date-time
     $type: |-
@@ -97,7 +98,7 @@ queryParams:
         }
       }
   - key: dateTo
-    value: 2025-12-31T23:59:59Z
+    value: '2025-12-31T23:59:59Z'
     disabled: false
     description: Return movements recorded at or before this ISO 8601 date-time
     $type: |-
@@ -113,6 +114,58 @@ queryParams:
 body:
   type: text
   content: ""
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test('Status code is 200', () => {
+          pm.response.to.have.status(200);
+      });
+      pm.test('Content-Type is application/json', () => {
+          pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');
+      });
+      pm.test('Response time is under 1000ms', () => {
+          pm.expect(pm.response.responseTime).to.be.below(1000);
+      });
+      pm.test('Response body matches StockMovementList schema', () => {
+          pm.response.to.have.jsonSchema({
+              type: 'object',
+              required: ['data', 'pagination'],
+              properties: {
+                  data: {
+                      type: 'array',
+                      items: {
+                          type: 'object',
+                          required: ['id', 'type', 'itemId', 'locationId'],
+                          properties: {
+                              id: { type: 'string' },
+                              type: { type: 'string', enum: ['receive', 'issue', 'adjust'] },
+                              itemId: { type: 'string' },
+                              locationId: { type: 'string' }
+                          }
+                      }
+                  },
+                  pagination: {
+                      type: 'object',
+                      required: ['page', 'pageSize', 'total'],
+                      properties: {
+                          page: { type: 'number' },
+                          pageSize: { type: 'number' },
+                          total: { type: 'number' }
+                      }
+                  }
+              }
+          });
+      });
+      pm.test('data is an array', () => {
+          pm.expect(pm.response.json().data).to.be.an('array');
+      });
+      pm.test('pagination has page, pageSize, total', () => {
+          const p = pm.response.json().pagination;
+          pm.expect(p).to.have.property('page');
+          pm.expect(p).to.have.property('pageSize');
+          pm.expect(p).to.have.property('total');
+      });
 settings: {}
 examples: ./.resources/List stock movements with optional filters.resources/examples
 order: 2000
