@@ -1,0 +1,9 @@
+services:
+  inventory-tracker-backend:
+    build:
+      context: ./server
+    ports:
+      - "4500:4500"
+    environment:
+      PORT: "4500"
+      # API_KEY: ""   # uncomment and set to require a specific x-api-key value

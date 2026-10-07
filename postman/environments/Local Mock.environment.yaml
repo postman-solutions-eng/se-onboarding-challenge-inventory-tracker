@@ -1,4 +1,4 @@
-name: Inventory Tracker – Local Mock
+name: Local Mock
 values:
   - key: baseUrl
     value: 'http://localhost:4500'
