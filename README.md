@@ -111,3 +111,34 @@ if you started it there instead)
 The `aws ecr delete-repository` step removes the pushed image entirely (ECR bills for
 storage regardless of use, however small) — the next deploy will need to recreate the
 repository and re-push the image from scratch (see the build & push step above).
+
+## Postman Insights (EKS only)
+
+The EKS deployment (`k8s/overlays/eks`) carries a `postman-insights-agent` sidecar,
+added via `k8s/overlays/eks/insights-sidecar-patch.yaml`, that passively observes the
+backend's inbound traffic on port `4500` and reports endpoint/error metrics to the
+"Inventory Tracker API" Insights project (`svc_0yzr0Ad3hBDhXaGn4TBq1A`) in the linked
+Postman workspace. It's EKS-only — the local Docker Desktop and bare-Docker paths
+above are unaffected.
+
+The sidecar needs a `postman-agent-secrets` Secret (key: `postman-api-key`) present in
+the `gcho` namespace, created out-of-band (not committed to git):
+```
+kubectl --context arn:aws:eks:us-east-2:005904641462:cluster/se-kube-demo \
+  -n gcho create secret generic postman-agent-secrets --from-literal=postman-api-key=<PMAK>
+```
+Because `k8s/base/namespace.yaml` is part of this kustomization, running the teardown
+command in the EKS section above (`kubectl delete -k k8s/overlays/eks`) deletes the
+whole `gcho` namespace — which also deletes this Secret, since namespace deletion
+cascades to everything in it regardless of which tool created it. Recreate the Secret
+after any teardown + redeploy cycle.
+
+**Verify the agent is running:**
+```
+kubectl --context arn:aws:eks:us-east-2:005904641462:cluster/se-kube-demo -n gcho get pods
+kubectl --context arn:aws:eks:us-east-2:005904641462:cluster/se-kube-demo -n gcho logs <pod> -c postman-insights-agent
+```
+Expect `2/2 Running` and log lines confirming a new trace was created on Postman
+Cloud. Traffic shows up in the Insights project a few minutes after real requests hit
+the service (e.g. running the Postman collection against the **Staging** environment
+through the usual port-forward).

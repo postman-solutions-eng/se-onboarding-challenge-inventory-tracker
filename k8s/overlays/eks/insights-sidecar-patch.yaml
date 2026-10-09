@@ -1,0 +1,61 @@
+# Adds the Postman Insights Agent as a sidecar container to inventory-tracker-backend.
+# Generated via `postman-insights-agent kube inject` against the rendered eks overlay
+# (see README.md's Postman Insights section) and hand-copied here so it's part of the
+# declarative manifest rather than a one-off live patch.
+#
+# Requires a Secret named postman-agent-secrets (key: postman-api-key) to already exist
+# in the gcho namespace — create it out-of-band, e.g.:
+#   kubectl --context arn:aws:eks:us-east-2:005904641462:cluster/se-kube-demo \
+#     -n gcho create secret generic postman-agent-secrets --from-literal=postman-api-key=<PMAK>
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-tracker-backend
+spec:
+  template:
+    spec:
+      containers:
+        - name: postman-insights-agent
+          image: public.ecr.aws/postman/postman-insights-agent:latest
+          args:
+            - apidump
+            - --project
+            - svc_0yzr0Ad3hBDhXaGn4TBq1A
+            - --repro-mode
+          env:
+            - name: POSTMAN_INSIGHTS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: postman-agent-secrets
+                  key: postman-api-key
+            - name: POSTMAN_K8S_NODE
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POSTMAN_K8S_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POSTMAN_K8S_POD
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POSTMAN_K8S_HOST_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: POSTMAN_K8S_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          resources:
+            requests:
+              cpu: 200m
+              memory: 500Mi
+            limits:
+              cpu: 200m
+              memory: 500Mi
+          securityContext:
+            capabilities:
+              add:
+                - NET_RAW
