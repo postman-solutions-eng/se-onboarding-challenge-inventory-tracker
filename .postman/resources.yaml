@@ -1,9 +1,18 @@
-# Use this workspace to collaborate
+cloudResources:
+  collections:
+    ../postman/collections/Inventory Tracker API Collection: 58075253-a6ebf63a-2ad4-48e8-a87d-b2c5176377c4
+  environments:
+    ../postman/environments/Local Mock.environment.yaml: 58075253-8a9b4bb8-ee96-4a71-bcff-8401778a6d4a
+    ../postman/environments/Staging.environment.yaml: 58075253-ef82d8c5-444c-4085-8d0e-ce813cf055df
+    ../postman/environments/dev.environment.yaml: 58075253-4b84a9f2-5884-4f10-ac80-6506464bb434
+  globals:
+    ../postman/globals/workspace.globals.yaml: 14ebe502-781a-4410-8fdb-77373a533c88
+  mocks:
+    ../postman/mocks/inventory-tracker-mock/config.yaml: 01a10ed1-de57-73ce-9990-567f82cf59ab
+  specs:
+    ../postman/specs/inventory-tracker.yaml: 631caca8-802c-4b40-9ef9-592062d31082
+resourceNameMappings:
+  specs:
+    - ../postman/specs/inventory-tracker.yaml: inventory-tracker.yaml
 workspace:
   id: c1e6f8e5-8f97-45c3-9b85-67d3cd809f1f
-
-# All resources in the `postman/` folder are automatically registered in Local View.
-# Point to additional files outside the `postman/` folder to register them individually. Example:
-#localResources:
-#  collections:
-#    - ../tests/E2E Test Collection/
