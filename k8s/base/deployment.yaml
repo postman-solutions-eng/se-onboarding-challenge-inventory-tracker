@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inventory-tracker-backend
+  labels:
+    app: inventory-tracker-backend
+spec:
+  # Must stay at 1: state is in-memory per process, so multiple replicas
+  # would each hold independent, diverging data behind the same Service.
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inventory-tracker-backend
+  template:
+    metadata:
+      labels:
+        app: inventory-tracker-backend
+    spec:
+      containers:
+        - name: inventory-tracker-backend
+          image: inventory-tracker-backend
+          ports:
+            - name: http
+              containerPort: 4500
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: inventory-tracker-config
+                  key: PORT
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: inventory-tracker-secret
+                  key: API_KEY
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 1
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

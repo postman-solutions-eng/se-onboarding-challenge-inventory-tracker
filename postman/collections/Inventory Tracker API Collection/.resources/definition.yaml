@@ -43,8 +43,6 @@ auth:
 variables:
   sku: ""
   locationCode: ""
-  itemId: ""
-  locationId: ""
 scripts:
   - type: http:beforeRequest
     code: |-

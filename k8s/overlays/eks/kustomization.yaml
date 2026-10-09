@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: gcho
+
+resources:
+  - ../../base
+
+# kustomize's namespace transformer stamps metadata.namespace on namespaced
+# resources but deliberately doesn't rename a Namespace resource's own
+# metadata.name, so that has to be patched explicitly to stay consistent.
+patches:
+  - target:
+      kind: Namespace
+      name: inventory-tracker
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: gcho
+
+images:
+  - name: inventory-tracker-backend
+    newName: 005904641462.dkr.ecr.us-east-2.amazonaws.com/se-challenge/gcho-inventory-tracker
+    newTag: v1
