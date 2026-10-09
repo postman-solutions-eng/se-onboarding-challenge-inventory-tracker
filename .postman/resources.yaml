@@ -1,6 +1,8 @@
 cloudResources:
   collections:
     ../postman/collections/Inventory Tracker API Collection: 58075253-a6ebf63a-2ad4-48e8-a87d-b2c5176377c4
+  documents:
+    ../postman/documents/README.md: e2678de3-f0f9-478d-8f02-e75feffe949c
   environments:
     ../postman/environments/Local Mock.environment.yaml: 58075253-8a9b4bb8-ee96-4a71-bcff-8401778a6d4a
     ../postman/environments/Staging.environment.yaml: 58075253-ef82d8c5-444c-4085-8d0e-ce813cf055df
